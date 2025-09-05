@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+motor
+pydantic
+python-multipart
+pandas
+transformers
+torch
+scikit-learn
+numpy
+python-dotenv
