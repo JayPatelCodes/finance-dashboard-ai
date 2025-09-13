@@ -17,7 +17,7 @@ A full-stack AI-powered finance dashboard that helps users upload, categorize, a
 
 ## Description
 
-The AI Finance Dashboard enables users to securely upload transaction CSV files, automatically categorize spending, and view interactive insights. A built-in chatbot, powered by **DeepSeek LLM**, allows users to ask natural language questions about their finances — from spending breakdowns to monthly trends — for a more personalized experience.
+The AI Finance Dashboard enables users to securely upload transaction CSV files, automatically categorize spending, and view interactive insights. A built-in chatbot, powered by **DeepSeek LLM**, allows users to ask natural language questions about their finances, from spending breakdowns to monthly trends, for a more personalized experience.
 
 ---
 
