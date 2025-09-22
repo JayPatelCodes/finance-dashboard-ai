@@ -133,10 +133,10 @@ export default function Charts({ items }: { items: Tx[] }) {
               <Tooltip />
               <Legend />
               <Bar dataKey="predicted">
-                {forecast.map((entry, index) => (
+                {forecast.map(({ predicted }, index) => (
                   <Cell 
                     key={`bar-${index}`} 
-                    fill={entry.predicted < 0 ? '#ff4d4f' : '#4caf50'} 
+                    fill={predicted < 0 ? '#ff4d4f' : '#4caf50'} 
                   />
                 ))}
               </Bar>
