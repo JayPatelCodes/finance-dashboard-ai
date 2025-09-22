@@ -65,10 +65,11 @@ cd backend
 pip install -r requirements.txt
 ```
 
-Create a `.env` file inside the `backend` folder:
+Create a `.env` file inside the root of `backend` folder:
 
 ```env
 MONGO_URI=mongodb://localhost:27017/finance
+MONGODB_DB=finance_ai_dashboard
 DEEPSEEK_API_KEY=your-deepseek-api-key
 ```
 
