@@ -6,7 +6,7 @@ from database import init_db
 
 app = FastAPI(title="AI Personal Finance API (MongoDB)")
 
-origins = os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
+origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,https://finance-dashboard-ai.vercel.app/").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
