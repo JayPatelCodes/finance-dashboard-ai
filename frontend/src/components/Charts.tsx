@@ -54,7 +54,7 @@ export default function Charts({ items }: { items: Tx[] }) {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie dataKey="value" data={byCat} outerRadius={110} label>
-                {byCat.map((entry, index) => (
+                {byCat.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -133,10 +133,10 @@ export default function Charts({ items }: { items: Tx[] }) {
               <Tooltip />
               <Legend />
               <Bar dataKey="predicted">
-                {forecast.map(({ predicted }, index) => (
+                {forecast.map((entry, index) => (
                   <Cell 
                     key={`bar-${index}`} 
-                    fill={predicted < 0 ? '#ff4d4f' : '#4caf50'} 
+                    fill={entry.predicted < 0 ? '#ff4d4f' : '#4caf50'} 
                   />
                 ))}
               </Bar>
