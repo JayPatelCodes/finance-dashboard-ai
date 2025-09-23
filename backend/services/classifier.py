@@ -18,7 +18,7 @@ def get_labels():
 @lru_cache(maxsize=1)
 def get_classifier():
     # Loads once per process
-    return pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+    return pipeline("zero-shot-classification", model="cross-encoder/nli-distilroberta-base")
 
 def categorize_text(description: str) -> str:
     clf = get_classifier()
