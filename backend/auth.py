@@ -6,6 +6,7 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from database import db
+from bson import ObjectId
 
 SECRET_KEY = os.getenv("JWT_SECRET", "change-this-in-production-please")
 ALGORITHM = "HS256"
@@ -44,7 +45,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
     except JWTError:
         raise credentials_exception
 
-    user = await db["users"].find_one({"_id": user_id}, {"password": 0})
+    try:
+        oid = ObjectId(user_id)
+    except Exception:
+        raise credentials_exception
+
+    user = await db["users"].find_one({"_id": oid}, {"password": 0})
     if user is None:
         raise credentials_exception
 
