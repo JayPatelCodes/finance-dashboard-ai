@@ -5,7 +5,7 @@ import UploadArea from './components/UploadArea'
 import TransactionsTable from './components/TransactionsTable'
 import Charts from './components/Charts'
 import Chatbot from './components/Chatbot'
-import { fetchTransactions, fetchInsights, fetchMonths, clearTransactions } from './api'
+import { fetchTransactions, fetchInsights, fetchMonths, fetchForecast, clearTransactions } from './api'
 import type { Tx } from './api'
 
 const INSIGHT_LABELS: Record<string, string> = {
@@ -14,24 +14,29 @@ const INSIGHT_LABELS: Record<string, string> = {
   avg_daily_spend: 'Daily Average',
 }
 
+type ForecastData = { points: { date: string; predicted: number }[]; summary: string }
+
 export default function App() {
   const { user, logout, loading } = useAuth()
   const [tx, setTx] = useState<Tx[]>([])
   const [insights, setInsights] = useState<{ key: string; value: string }[]>([])
   const [months, setMonths] = useState<string[]>([])
   const [activeMonth, setActiveMonth] = useState<string | null>(null)
+  const [forecast, setForecast] = useState<ForecastData>({ points: [], summary: '' })
   const [clearing, setClearing] = useState(false)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
 
   const refresh = async (month?: string | null) => {
-    const [items, ins, ms] = await Promise.all([
+    const [items, ins, ms, fc] = await Promise.all([
       fetchTransactions(month ?? undefined),
       fetchInsights(),
       fetchMonths(),
+      fetchForecast(),
     ])
     setTx(items)
     setInsights(ins)
     setMonths(ms)
+    setForecast(fc)
     if (!month && ms.length > 0 && !activeMonth) {
       setActiveMonth(ms[ms.length - 1])
       const fresh = await fetchTransactions(ms[ms.length - 1])
@@ -56,6 +61,7 @@ export default function App() {
     setInsights([])
     setMonths([])
     setActiveMonth(null)
+    setForecast({ points: [], summary: '' })
     setShowClearConfirm(false)
     setClearing(false)
   }
@@ -170,7 +176,7 @@ export default function App() {
         <div className="dashboard-grid">
           <div className="card">
             <h3>Spending Analysis</h3>
-            <Charts items={tx} />
+            <Charts items={tx} forecast={forecast} />
           </div>
           <div className="card">
             <h3>Transaction History</h3>
