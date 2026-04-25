@@ -1,11 +1,13 @@
 fastapi
 uvicorn[standard]
 motor
-pydantic
+pydantic[email]
 python-multipart
 pandas
-transformers
-torch
 scikit-learn
 numpy
 python-dotenv
+google-genai
+python-jose[cryptography]
+passlib[bcrypt]
+httpx
