@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { getCurrentUser } from './api'
+import axios from 'axios'
 
 export type User = {
   id: string
@@ -24,6 +24,8 @@ const AuthContext = createContext<AuthCtx>({
   loading: true,
 })
 
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
@@ -31,18 +33,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem('finai_token')
-    if (stored) {
-      setToken(stored)
-      getCurrentUser(stored)
-        .then(u => setUser(u))
-        .catch(() => {
-          localStorage.removeItem('finai_token')
-          setToken(null)
-        })
-        .finally(() => setLoading(false))
-    } else {
+    if (!stored) {
       setLoading(false)
+      return
     }
+
+    // Verify token is still valid by calling /auth/me directly with the token
+    axios.get<User>(`${baseURL}/auth/me`, {
+      headers: { Authorization: `Bearer ${stored}` },
+    })
+      .then(res => {
+        setToken(stored)
+        setUser(res.data)
+      })
+      .catch(() => {
+        localStorage.removeItem('finai_token')
+      })
+      .finally(() => setLoading(false))
   }, [])
 
   const login = (newToken: string, newUser: User) => {
