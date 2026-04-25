@@ -26,7 +26,8 @@ const TOOLTIP_STYLE = {
 }
 
 function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const [y, m, day] = d.split('-').map(Number)
+  return new Date(y, m - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 function renderPieLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) {
