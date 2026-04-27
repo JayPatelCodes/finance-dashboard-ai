@@ -68,3 +68,44 @@ export const fetchForecast = async () => {
   const { data } = await api.get<{ points: Array<{ date: string; predicted: number }>; summary: string }>('/forecast')
   return data
 }
+
+// ── Budgets ────────────────────────────────────────────────────────────────
+
+export type Budget = {
+  id: string
+  category: string
+  amount: number
+  month: string | null
+  spent: number
+  percent: number
+}
+
+export const fetchBudgets = async (month?: string): Promise<Budget[]> => {
+  const { data } = await api.get<Budget[]>('/budgets', { params: month ? { month } : {} })
+  return data
+}
+
+export const createBudget = async (category: string, amount: number, month: string | null) => {
+  const { data } = await api.post('/budgets', { category, amount, month })
+  return data
+}
+
+export const deleteBudget = async (id: string) => {
+  const { data } = await api.delete(`/budgets/${id}`)
+  return data
+}
+
+// ── Recurring ──────────────────────────────────────────────────────────────
+
+export type RecurringItem = {
+  description: string
+  occurrences: number
+  avg_amount: number
+  last_date: string
+  type: 'income' | 'expense'
+}
+
+export const fetchRecurring = async (): Promise<RecurringItem[]> => {
+  const { data } = await api.get<{ items: RecurringItem[] }>('/recurring')
+  return data.items
+}
