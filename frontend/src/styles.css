@@ -691,3 +691,11 @@ body {
 .danger-btn:hover:not(:disabled) { background: rgba(240,92,92,0.25); }
 .danger-btn-ghost { background: none; border: none; color: var(--text-dim); font-size: 12px; padding: 6px 0; text-align: left; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 .danger-btn-ghost:hover { color: var(--red); }
+
+/* ── Header meta ── */
+.header-meta {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-family: 'DM Mono', monospace;
+}
