@@ -6,6 +6,8 @@ import TransactionsTable from './components/TransactionsTable'
 import Charts from './components/Charts'
 import Chatbot from './components/Chatbot'
 import { fetchTransactions, fetchInsights, fetchMonths, fetchForecast, clearTransactions } from './api'
+import BudgetGoals from './components/BudgetGoals'
+import RecurringTransactions from './components/RecurringTransactions'
 import type { Tx } from './api'
 
 const INSIGHT_LABELS: Record<string, string> = {
@@ -170,8 +172,20 @@ export default function App() {
 
       <main className="main-content">
         <header className="main-header">
-          <h1>{activeMonth ? fmtMonth(activeMonth) : 'Financial Overview'}</h1>
-          <p>AI-powered transaction analysis and spending forecasts.</p>
+          <div>
+            <h1>{activeMonth ? fmtMonth(activeMonth) : 'Financial Overview'}</h1>
+            <p className="header-meta">
+              {tx.length > 0 ? (
+                <>
+                  {tx.length} transactions
+                  {' · '}
+                  {new Date(...(tx[0].Date.split('T')[0].split('-').map(Number) as [number, number, number])).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {' – '}
+                  {new Date(...(tx[tx.length - 1].Date.split('T')[0].split('-').map(Number) as [number, number, number])).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </>
+              ) : 'AI-powered transaction analysis and spending forecasts.'}
+            </p>
+          </div>
         </header>
         <div className="dashboard-grid">
           <div className="card">
@@ -181,6 +195,14 @@ export default function App() {
           <div className="card">
             <h3>Transaction History</h3>
             <TransactionsTable items={tx} />
+          </div>
+          <div className="card">
+            <h3>Budget Goals</h3>
+            <BudgetGoals activeMonth={activeMonth} />
+          </div>
+          <div className="card">
+            <h3>Recurring Transactions</h3>
+            <RecurringTransactions />
           </div>
         </div>
       </main>
