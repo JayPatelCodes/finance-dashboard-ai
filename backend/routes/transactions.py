@@ -1,12 +1,15 @@
+import datetime
+import hashlib
+import pandas as pd
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from utils import parse_csv
 from services.classifier import categorize_text
 from database import transactions as tx_collection
 from auth import get_current_user
-import pandas as pd
-import hashlib
 
 router = APIRouter()
+
+MAX_UPLOAD_SIZE = 5 * 1024 * 1024  # 5MB
 
 
 def _csv_hash(content: bytes) -> str:
@@ -21,9 +24,17 @@ async def upload_csv(
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a CSV file.")
 
-    content = await file.read()
+    # Read with size limit
+    content = await file.read(MAX_UPLOAD_SIZE + 1)
+    if len(content) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=413, detail="File too large. Maximum size is 5MB.")
 
-    # Duplicate detection: reject if this exact file was already uploaded by this user
+    # Sanity check: first line should look like a CSV header
+    first_line = content.split(b"\n")[0].decode("utf-8", errors="ignore").strip()
+    if "," not in first_line:
+        raise HTTPException(status_code=400, detail="File does not appear to be a valid CSV.")
+
+    # Duplicate detection
     file_hash = _csv_hash(content)
     existing = await tx_collection.find_one({
         "user_id": current_user["id"],
@@ -61,7 +72,7 @@ async def upload_csv(
 async def list_transactions(
     limit: int = 500,
     skip: int = 0,
-    month: str = None,  # e.g. "2024-03"
+    month: str = None,
     current_user: dict = Depends(get_current_user),
 ):
     query: dict = {"user_id": current_user["id"]}
@@ -69,18 +80,15 @@ async def list_transactions(
     if month:
         try:
             year, m = map(int, month.split("-"))
-            import datetime
             start = datetime.datetime(year, m, 1)
-            # First day of next month
-            if m == 12:
-                end = datetime.datetime(year + 1, 1, 1)
-            else:
-                end = datetime.datetime(year, m + 1, 1)
+            end = datetime.datetime(year + 1, 1, 1) if m == 12 else datetime.datetime(year, m + 1, 1)
             query["Date"] = {"$gte": start, "$lt": end}
         except Exception:
             raise HTTPException(status_code=400, detail="Invalid month format. Use YYYY-MM.")
 
-    cursor = tx_collection.find(query, {"_id": 0, "user_id": 0, "file_hash": 0}).sort("Date", 1).skip(skip).limit(limit)
+    cursor = tx_collection.find(
+        query, {"_id": 0, "user_id": 0, "file_hash": 0}
+    ).sort("Date", 1).skip(skip).limit(limit)
     items = await cursor.to_list(length=limit)
     for it in items:
         if "Date" in it and hasattr(it["Date"], "isoformat"):
@@ -90,7 +98,6 @@ async def list_transactions(
 
 @router.get("/transactions/months")
 async def list_months(current_user: dict = Depends(get_current_user)):
-    """Return a sorted list of YYYY-MM strings the user has data for."""
     pipeline = [
         {"$match": {"user_id": current_user["id"]}},
         {"$group": {"_id": {
@@ -109,6 +116,5 @@ async def list_months(current_user: dict = Depends(get_current_user)):
 
 @router.delete("/transactions")
 async def clear_transactions(current_user: dict = Depends(get_current_user)):
-    """Delete all transactions for the current user."""
     result = await tx_collection.delete_many({"user_id": current_user["id"]})
     return {"deleted": result.deleted_count}
