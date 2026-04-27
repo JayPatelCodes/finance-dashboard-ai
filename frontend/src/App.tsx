@@ -27,6 +27,7 @@ export default function App() {
   const [forecast, setForecast] = useState<ForecastData>({ points: [], summary: '' })
   const [clearing, setClearing] = useState(false)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
+  const [showYearPicker, setShowYearPicker] = useState(false)
 
   const refresh = async (month?: string | null) => {
     const [items, ins, ms, fc] = await Promise.all([
@@ -109,24 +110,7 @@ export default function App() {
           <UploadArea onUploaded={() => refresh(activeMonth)} />
         </div>
 
-        {months.length > 0 && (
-          <div className="sidebar-section">
-            <h3>Month</h3>
-            <div className="month-list">
-              <button
-                className={`month-btn ${activeMonth === null ? 'active' : ''}`}
-                onClick={() => { setActiveMonth(null); refresh(null) }}
-              >All time</button>
-              {months.map(m => (
-                <button
-                  key={m}
-                  className={`month-btn ${activeMonth === m ? 'active' : ''}`}
-                  onClick={() => handleMonthChange(m)}
-                >{fmtMonth(m)}</button>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         <div className="sidebar-section">
           <h3>Quick Insights</h3>
@@ -172,20 +156,80 @@ export default function App() {
 
       <main className="main-content">
         <header className="main-header">
-          <div>
-            <h1>{activeMonth ? fmtMonth(activeMonth) : 'Financial Overview'}</h1>
-            <p className="header-meta">
-              {tx.length > 0 ? (
-                <>
-                  {tx.length} transactions
-                  {' · '}
-                  {new Date(...(tx[0].Date.split('T')[0].split('-').map(Number) as [number, number, number])).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  {' – '}
-                  {new Date(...(tx[tx.length - 1].Date.split('T')[0].split('-').map(Number) as [number, number, number])).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                </>
-              ) : 'AI-powered transaction analysis and spending forecasts.'}
-            </p>
-          </div>
+          {months.length > 0 ? (
+            <div className="month-nav-header">
+              <button
+                className="month-nav-arrow"
+                disabled={activeMonth === null || months.indexOf(activeMonth) <= 0}
+                onClick={() => {
+                  if (!activeMonth) return
+                  const idx = months.indexOf(activeMonth)
+                  if (idx > 0) handleMonthChange(months[idx - 1])
+                }}
+              >‹</button>
+
+              <div className="month-nav-center">
+                <button
+                  className="month-nav-title"
+                  onClick={() => setShowYearPicker(v => !v)}
+                  title="Click to browse all months"
+                >
+                  {activeMonth ? fmtMonth(activeMonth) : 'All time'}
+                  <span className="month-nav-caret">▾</span>
+                </button>
+
+                {tx.length > 0 && (
+                  <p className="header-meta">
+                    {tx.length} transactions
+                    {' · '}
+                    {(() => { const [y,m,d] = tx[0].Date.split('T')[0].split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) })()}
+                    {' – '}
+                    {(() => { const [y,m,d] = tx[tx.length-1].Date.split('T')[0].split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) })()}
+                  </p>
+                )}
+
+                {showYearPicker && (
+                  <div className="year-picker">
+                    {Array.from(new Set(months.map(m => m.split('-')[0]))).map(year => (
+                      <div key={year} className="year-picker-group">
+                        <div className="year-picker-year">{year}</div>
+                        <div className="year-picker-months">
+                          {months.filter(m => m.startsWith(year)).map(m => (
+                            <button
+                              key={m}
+                              className={`year-picker-month ${activeMonth === m ? 'active' : ''}`}
+                              onClick={() => { handleMonthChange(m); setShowYearPicker(false) }}
+                            >
+                              {new Date(+m.split('-')[0], +m.split('-')[1] - 1).toLocaleDateString('en-US', { month: 'short' })}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      className={`year-picker-all ${activeMonth === null ? 'active' : ''}`}
+                      onClick={() => { setActiveMonth(null); refresh(null); setShowYearPicker(false) }}
+                    >All time</button>
+                  </div>
+                )}
+              </div>
+
+              <button
+                className="month-nav-arrow"
+                disabled={activeMonth === null || months.indexOf(activeMonth) >= months.length - 1}
+                onClick={() => {
+                  if (!activeMonth) return
+                  const idx = months.indexOf(activeMonth)
+                  if (idx < months.length - 1) handleMonthChange(months[idx + 1])
+                }}
+              >›</button>
+            </div>
+          ) : (
+            <div>
+              <h1>Financial Overview</h1>
+              <p className="header-meta">AI-powered transaction analysis and spending forecasts.</p>
+            </div>
+          )}
         </header>
         <div className="dashboard-grid">
           <div className="card">

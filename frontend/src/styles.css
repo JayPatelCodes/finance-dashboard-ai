@@ -699,3 +699,210 @@ body {
   font-size: 13px;
   font-family: 'DM Mono', monospace;
 }
+
+/* ── Select dropdown dark theme fix ── */
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7a9e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+  cursor: pointer;
+  color-scheme: dark;
+}
+
+select.input option {
+  background: #0e1530;
+  color: #e8eeff;
+}
+
+/* ── Month arrow navigation ── */
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+.month-nav-arrow {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.1s, color 0.1s;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.month-nav-arrow:hover:not(:disabled) {
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+}
+
+.month-nav-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.month-nav-label {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.1s;
+  width: 100%;
+}
+
+.month-nav-label:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+/* ── Year picker dropdown ── */
+.year-picker {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #0e1530;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 12px;
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.year-picker-year {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+
+.year-picker-months {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.year-picker-month {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  padding: 5px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.year-picker-month:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+}
+
+.year-picker-month.active {
+  background: rgba(79,142,247,0.15);
+  border-color: rgba(79,142,247,0.3);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.year-picker-all {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.1s;
+}
+
+.year-picker-all:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.year-picker-all.active { color: var(--accent); border-color: rgba(79,142,247,0.3); }
+
+/* ── Centered month navigator in header ── */
+.month-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+  padding: 8px 0;
+}
+
+.month-nav-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  min-width: 200px;
+}
+
+.month-nav-title {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s;
+  line-height: 1.2;
+}
+
+.month-nav-title:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.month-nav-caret {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.month-nav-header .month-nav-arrow {
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  border-radius: 8px;
+}
+
+.month-nav-header .year-picker {
+  top: calc(100% + 8px);
+  min-width: 220px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.month-nav-header .header-meta {
+  margin-top: 4px;
+  text-align: center;
+}

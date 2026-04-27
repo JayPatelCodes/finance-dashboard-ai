@@ -6,6 +6,13 @@ import pandas as pd
 
 router = APIRouter()
 
+def _title(s: str) -> str:
+    """Title-case without capitalizing after apostrophes."""
+    return " ".join(
+        word[0].upper() + word[1:] if word else word
+        for word in s.split(" ")
+    )
+
 @router.get("/recurring")
 async def get_recurring(current_user: dict = Depends(get_current_user)):
     data = await tx_collection.find(
@@ -31,7 +38,7 @@ async def get_recurring(current_user: dict = Depends(get_current_user)):
 
     items = [
         {
-            "description": row["Description"].title(),
+            "description": _title(row["Description"]),
             "occurrences": int(row["count"]),
             "avg_amount": round(float(row["avg_amount"]), 2),
             "last_date": row["last_date"].strftime("%Y-%m-%d"),
