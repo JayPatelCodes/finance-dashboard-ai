@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { clearTransactions } from '../api'
-import UploadArea from '../components/UploadArea'
 
-type Props = { onDataCleared: () => void; onUploaded: () => void }
+type Props = { onDataCleared: () => void }
 
-export default function SettingsPage({ onDataCleared, onUploaded }: Props) {
+export default function SettingsPage({ onDataCleared }: Props) {
   const { user } = useAuth()
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const [clearing, setClearing] = useState(false)
@@ -34,9 +33,9 @@ export default function SettingsPage({ onDataCleared, onUploaded }: Props) {
         <div className="card">
           <h3>Account</h3>
           <div className="settings-row">
-            <div className="user-avatar" style={{ width: 48, height: 48, fontSize: 20 }}>
+            <div className="user-avatar" style={{ width: 48, height: 48, fontSize: 20, flexShrink: 0 }}>
               {user?.avatar
-                ? <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                ? <img src={user.avatar} alt={user?.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                 : user?.name[0].toUpperCase()
               }
             </div>
@@ -50,37 +49,44 @@ export default function SettingsPage({ onDataCleared, onUploaded }: Props) {
           </div>
         </div>
 
-        {/* Import data */}
+        {/* CSV format info */}
         <div className="card">
-          <h3>Import Transactions</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 14px' }}>
-            Upload a CSV with columns: Date, Description, Amount. Max 5MB.
+          <h3>CSV Format</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 12px' }}>
+            Your CSV must include these columns. Upload via the Import CSV button in the sidebar.
           </p>
-          <UploadArea onUploaded={onUploaded} />
+          <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 8, padding: '10px 14px', fontFamily: 'DM Mono, monospace', fontSize: 12, color: 'var(--text-muted)' }}>
+            Date, Description, Amount
+          </div>
+          <p style={{ color: 'var(--text-dim)', fontSize: 12, margin: '10px 0 0' }}>
+            Amounts should be negative for expenses and positive for income. Max file size: 5MB.
+          </p>
         </div>
 
         {/* Danger zone */}
         <div className="card" style={{ borderColor: 'rgba(240,92,92,0.2)' }}>
           <h3 style={{ color: 'var(--red)' }}>Danger Zone</h3>
-          <div className="settings-row" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
+          <div className="settings-row" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 500, fontSize: 14 }}>Clear all transaction data</div>
               <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 2 }}>
-                Permanently deletes all your uploaded transactions. This cannot be undone.
+                Permanently deletes all your uploaded transactions and cannot be undone.
               </div>
             </div>
-            {showClearConfirm ? (
-              <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                <button className="button danger-btn" onClick={handleClear} disabled={clearing}>
-                  {clearing ? 'Deleting…' : 'Confirm'}
+            <div style={{ flexShrink: 0, marginLeft: 16 }}>
+              {showClearConfirm ? (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="button danger-btn" onClick={handleClear} disabled={clearing}>
+                    {clearing ? 'Deleting…' : 'Confirm'}
+                  </button>
+                  <button className="button" onClick={() => setShowClearConfirm(false)}>Cancel</button>
+                </div>
+              ) : (
+                <button className="button danger-btn" onClick={() => setShowClearConfirm(true)}>
+                  Clear data
                 </button>
-                <button className="button" onClick={() => setShowClearConfirm(false)}>Cancel</button>
-              </div>
-            ) : (
-              <button className="button danger-btn" style={{ flexShrink: 0 }} onClick={() => setShowClearConfirm(true)}>
-                Clear data
-              </button>
-            )}
+              )}
+            </div>
           </div>
           {cleared && <p style={{ color: 'var(--green)', fontSize: 13, margin: '12px 0 0' }}>✓ All data cleared.</p>}
         </div>

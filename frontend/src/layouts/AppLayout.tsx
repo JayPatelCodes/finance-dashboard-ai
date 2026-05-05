@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import UploadArea from '../components/UploadArea'
 
 type Page = 'dashboard' | 'budgets' | 'recurring' | 'settings'
 
 type Props = {
   activePage: Page
   onNavigate: (page: Page) => void
+  onUploaded: () => void
   children: React.ReactNode
 }
 
@@ -16,9 +18,10 @@ const NAV_ITEMS: { id: Page; label: string; icon: string }[] = [
   { id: 'settings', label: 'Settings', icon: '⚙' },
 ]
 
-export default function AppLayout({ activePage, onNavigate, children }: Props) {
+export default function AppLayout({ activePage, onNavigate, onUploaded, children }: Props) {
   const { user, logout } = useAuth()
   const [collapsed, setCollapsed] = useState(false)
+  const [showUpload, setShowUpload] = useState(false)
 
   return (
     <div className="app-layout">
@@ -54,6 +57,36 @@ export default function AppLayout({ activePage, onNavigate, children }: Props) {
               : user.name[0].toUpperCase()
             }
           </div>
+        )}
+
+        {/* Upload button */}
+        {!collapsed && (
+          <div className="sidebar-section">
+            {showUpload ? (
+              <div>
+                <UploadArea onUploaded={() => { onUploaded(); setShowUpload(false) }} />
+                <button
+                  className="button"
+                  style={{ width: '100%', marginTop: 8, fontSize: 12 }}
+                  onClick={() => setShowUpload(false)}
+                >Cancel</button>
+              </div>
+            ) : (
+              <button className="button button-primary" style={{ width: '100%' }} onClick={() => setShowUpload(true)}>
+                + Import CSV
+              </button>
+            )}
+          </div>
+        )}
+
+        {collapsed && (
+          <button
+            className="nav-item collapsed"
+            onClick={() => { setCollapsed(false); setShowUpload(true) }}
+            title="Import CSV"
+          >
+            <span className="nav-icon">↑</span>
+          </button>
         )}
 
         {/* Nav */}

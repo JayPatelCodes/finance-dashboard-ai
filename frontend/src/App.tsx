@@ -72,7 +72,7 @@ export default function App() {
 
   return (
     <>
-      <AppLayout activePage={page} onNavigate={setPage}>
+      <AppLayout activePage={page} onNavigate={setPage} onUploaded={() => refresh(activeMonth)}>
         {page === 'dashboard' && (
           <DashboardPage
             tx={tx}
@@ -91,7 +91,6 @@ export default function App() {
         {page === 'settings' && (
           <SettingsPage
             onDataCleared={handleDataCleared}
-            onUploaded={() => refresh(activeMonth)}
           />
         )}
       </AppLayout>
