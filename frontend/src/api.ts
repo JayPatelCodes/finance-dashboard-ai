@@ -12,6 +12,7 @@ api.interceptors.request.use(config => {
 })
 
 export type Tx = { Date: string; Description: string; Amount: number; Category: string }
+export type ForecastData = { points: { date: string; predicted: number }[]; summary: string }
 export type User = { id: string; name: string; email: string; avatar?: string }
 export type AuthResponse = { access_token: string; token_type: string; user: User }
 

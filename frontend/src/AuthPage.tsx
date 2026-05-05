@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { signup, login, googleAuth } from './api'
-import { useAuth } from './AuthContext'
+import { useAuth } from './context/AuthContext'
 
 declare global {
   interface Window { google?: any }
@@ -91,7 +91,7 @@ export default function AuthPage() {
               <input
                 className="input"
                 type="text"
-                placeholder="Jay Patel"
+                placeholder="Bob Smith"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 required

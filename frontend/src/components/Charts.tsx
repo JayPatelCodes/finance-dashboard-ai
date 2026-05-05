@@ -1,80 +1,13 @@
+import { fetchForecast } from '../api'
 import type { Tx } from '../api'
-import {
-  AreaChart, Area, XAxis, YAxis, Tooltip,
-  PieChart, Pie, Cell, ResponsiveContainer,
-  CartesianGrid, Legend
+import { useEffect, useState } from 'react'
+import { 
+  LineChart, Line, XAxis, YAxis, Tooltip, 
+  PieChart, Pie, Cell, ResponsiveContainer, 
+  CartesianGrid, Legend, BarChart, Bar 
 } from 'recharts'
 
-const CAT_COLORS = [
-  '#4f8ef7', '#22c97a', '#f5a623', '#f05c5c',
-  '#7c5cfc', '#ff6bb3', '#00d4d4', '#ffd166',
-]
-
-const CHART_STYLE = {
-  fontSize: 11,
-  fontFamily: 'DM Sans, sans-serif',
-  fill: '#6b7a9e',
-}
-
-const TOOLTIP_STYLE = {
-  background: '#131b35',
-  border: '1px solid rgba(255,255,255,0.12)',
-  borderRadius: 10,
-  color: '#e8eeff',
-  fontSize: 12,
-  fontFamily: 'DM Sans, sans-serif',
-}
-
-function fmtDate(d: string) {
-  const [y, m, day] = d.split('-').map(Number)
-  return new Date(y, m - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
-
-function renderPieLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) {
-  if (percent < 0.06) return null
-  const RADIAN = Math.PI / 180
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.6
-  const x = cx + radius * Math.cos(-midAngle * RADIAN)
-  const y = cy + radius * Math.sin(-midAngle * RADIAN)
-  return (
-    <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={500}>
-      {(percent * 100).toFixed(0)}%
-    </text>
-  )
-}
-
-function PieTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null
-  const { name, value } = payload[0]
-  return (
-    <div style={TOOLTIP_STYLE}>
-      <div style={{ padding: '8px 12px' }}>
-        <div style={{ fontWeight: 600 }}>{name}</div>
-        <div style={{ color: '#22c97a', fontFamily: 'DM Mono, monospace' }}>${value.toFixed(2)}</div>
-      </div>
-    </div>
-  )
-}
-
-function LineTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null
-  return (
-    <div style={TOOLTIP_STYLE}>
-      <div style={{ padding: '8px 12px' }}>
-        <div style={{ color: '#6b7a9e', marginBottom: 4, fontSize: 11 }}>{fmtDate(label)}</div>
-        {payload.map((p: any) => (
-          <div key={p.dataKey} style={{ color: p.color, fontFamily: 'DM Mono, monospace' }}>
-            ${Math.abs(p.value ?? 0).toFixed(2)}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-type ForecastData = { points: { date: string; predicted: number }[]; summary: string }
-
-export default function Charts({ items, forecast }: { items: Tx[]; forecast: ForecastData }) {
+export default function Charts({ items }: { items: Tx[] }) {
   const expenses = items.filter(i => i.Amount < 0)
 
   const byCat = Object.values(
@@ -85,110 +18,132 @@ export default function Charts({ items, forecast }: { items: Tx[]; forecast: For
     }, {})
   ) as Array<{ name: string; value: number }>
 
-  const byDay = (Object.values(
+  const byDay = Object.values(
     items.reduce((acc: any, t) => {
-      const dt = new Date(t.Date)
-      const d = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`
-      acc[d] = acc[d] || { date: d, spent: 0, income: 0 }
-      if (t.Amount < 0) acc[d].spent += Math.abs(t.Amount)
-      else acc[d].income += t.Amount
+      const d = new Date(t.Date).toISOString().split('T')[0]
+      acc[d] = acc[d] || { date: d, amount: 0 }
+      acc[d].amount += t.Amount
       return acc
     }, {})
-  ) as Array<{ date: string; spent: number; income: number }>)
-    .sort((a, b) => a.date.localeCompare(b.date))
+  ).sort((a: any, b: any) => a.date.localeCompare(b.date)) as Array<{ date: string; amount: number }>
 
-  const { points: forecastPoints, summary: forecastSummary } = forecast
+  const [forecast, setForecast] = useState<{ date: string; predicted: number }[]>([])
+  const [forecastSummary, setForecastSummary] = useState('')
 
-  const dayTickInterval = byDay.length > 0 ? Math.max(1, Math.floor(byDay.length / 6)) : 1
-  const fcastTickInterval = forecastPoints.length > 0 ? Math.max(1, Math.floor(forecastPoints.length / 5)) : 1
+  useEffect(() => {
+    (async () => {
+      const f = await fetchForecast()
+      setForecast(f.points)
+      setForecastSummary(f.summary)
+    })()
+  }, [items.length])
 
-  if (items.length === 0) {
-    return (
-      <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-dim)' }}>
-        <div style={{ fontSize: 36, marginBottom: 12 }}>📊</div>
-        <p style={{ margin: 0, fontSize: 14 }}>Charts will appear after you upload a CSV.</p>
-      </div>
-    )
-  }
+  // Palette for categories
+  const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7f50', '#00c49f', '#ffbb28', '#d0ed57', '#a4de6c']
+
+  // Split daily amounts into two datasets for conditional line coloring
+  const byDayPositive = byDay.map(d => ({ ...d, amount: d.amount >= 0 ? d.amount : null }))
+  const byDayNegative = byDay.map(d => ({ ...d, amount: d.amount < 0 ? d.amount : null }))
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-
-        {/* Donut */}
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 14 }}>
-            Spending by Category
-          </div>
-          <div style={{ height: 260 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie dataKey="value" data={byCat} innerRadius={60} outerRadius={100} paddingAngle={3} labelLine={false} label={renderPieLabel}>
-                  {byCat.map((_, i) => <Cell key={i} fill={CAT_COLORS[i % CAT_COLORS.length]} />)}
-                </Pie>
-                <Tooltip content={<PieTooltip />} />
-                <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ color: '#6b7a9e', fontSize: 11 }}>{value}</span>} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+    <div className="grid">
+      {/* Spending by Category */}
+      <div className="card">
+        <h3>Spending by Category</h3>
+        <div style={{ height: 320 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie dataKey="value" data={byCat} outerRadius={110} label>
+                {byCat.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
+      </div>
 
-        {/* Daily trend */}
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 14 }}>
-            Daily Spending Trend
-          </div>
-          <div style={{ height: 260 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={byDay} margin={{ top: 4, right: 8, left: -10, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="gradSpent" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f05c5c" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#f05c5c" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gradIncome" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22c97a" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#22c97a" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="date" tick={CHART_STYLE} tickLine={false} axisLine={false} interval={dayTickInterval} tickFormatter={fmtDate} />
-                <YAxis tick={CHART_STYLE} tickLine={false} axisLine={false} tickFormatter={v => `$${Math.abs(v)}`} />
-                <Tooltip content={<LineTooltip />} />
-                <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ color: '#6b7a9e', fontSize: 11, textTransform: 'capitalize' }}>{value}</span>} />
-                <Area type="monotone" dataKey="spent" stroke="#f05c5c" strokeWidth={2} fill="url(#gradSpent)" dot={false} />
-                <Area type="monotone" dataKey="income" stroke="#22c97a" strokeWidth={2} fill="url(#gradIncome)" dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+      {/* Daily Spending Trend */}
+      <div className="card">
+        <h3>Daily Spending Trend</h3>
+        <div style={{ height: 320 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={byDay}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+
+              {/* Positive line (green) */}
+              <Line 
+                type="monotone" 
+                data={byDayPositive} 
+                dataKey="amount" 
+                stroke="#4caf50"
+                dot={({ cx, cy, value }) => (
+                  value != null ? (
+                    <circle 
+                      cx={cx} 
+                      cy={cy} 
+                      r={4} 
+                      stroke="black" 
+                      strokeWidth={1} 
+                      fill="#4caf50" 
+                    />
+                  ) : <></>
+                )}
+              />
+
+              {/* Negative line (red) */}
+              <Line 
+                type="monotone" 
+                data={byDayNegative} 
+                dataKey="amount" 
+                stroke="#ff4d4f"
+                dot={({ cx, cy, value }) => (
+                  value != null ? (
+                    <circle 
+                      cx={cx} 
+                      cy={cy} 
+                      r={4} 
+                      stroke="black" 
+                      strokeWidth={1} 
+                      fill="#ff4d4f" 
+                    />
+                  ) : <></>
+                )}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
       {/* Forecast */}
-      <div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
-          30-Day Spending Forecast
-        </div>
-        {forecastSummary && (
-          <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 14 }}>{forecastSummary}</div>
-        )}
-        <div style={{ height: 220 }}>
+      <div className="card" style={{ gridColumn: '1 / -1' }}>
+        <h3>30-Day Forecast</h3>
+        <div style={{ height: 340 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={forecastPoints} margin={{ top: 4, right: 8, left: -10, bottom: 0 }}>
-              <defs>
-                <linearGradient id="gradForecast" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#4f8ef7" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#4f8ef7" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey="date" tick={CHART_STYLE} tickLine={false} axisLine={false} interval={fcastTickInterval} tickFormatter={fmtDate} />
-              <YAxis tick={CHART_STYLE} tickLine={false} axisLine={false} tickFormatter={v => `$${Math.abs(v).toFixed(0)}`} />
-              <Tooltip content={<LineTooltip />} />
-              <Area type="monotone" dataKey="predicted" stroke="#4f8ef7" strokeWidth={2} fill="url(#gradForecast)" dot={false} strokeDasharray="6 3" />
-            </AreaChart>
+            <BarChart data={forecast}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" hide />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="predicted">
+                {forecast.map((entry, index) => (
+                  <Cell 
+                    key={`bar-${index}`} 
+                    fill={entry.predicted < 0 ? '#ff4d4f' : '#4caf50'} 
+                  />
+                ))}
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
         </div>
+        <p>{forecastSummary}</p>
       </div>
     </div>
   )
