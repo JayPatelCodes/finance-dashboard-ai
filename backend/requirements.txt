@@ -9,5 +9,5 @@ numpy
 python-dotenv
 google-genai
 python-jose[cryptography]
-passlib[bcrypt]
+passlib[bcrypt]==4.0.1
 httpx
