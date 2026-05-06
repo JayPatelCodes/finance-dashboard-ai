@@ -49,19 +49,7 @@ export default function SettingsPage({ onDataCleared }: Props) {
           </div>
         </div>
 
-        {/* CSV format info */}
-        <div className="card">
-          <h3>CSV Format</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 12px' }}>
-            Your CSV must include these columns. Upload via the Import CSV button in the sidebar.
-          </p>
-          <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 8, padding: '10px 14px', fontFamily: 'DM Mono, monospace', fontSize: 12, color: 'var(--text-muted)' }}>
-            Date, Description, Amount
-          </div>
-          <p style={{ color: 'var(--text-dim)', fontSize: 12, margin: '10px 0 0' }}>
-            Amounts should be negative for expenses and positive for income. Max file size: 5MB.
-          </p>
-        </div>
+
 
         {/* Danger zone */}
         <div className="card" style={{ borderColor: 'rgba(240,92,92,0.2)' }}>
