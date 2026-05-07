@@ -3,7 +3,7 @@ import hashlib
 import pandas as pd
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from utils import parse_csv
-from services.classifier import categorize_text
+from services.classifier import categorize_batch
 from database import transactions as tx_collection
 from auth import get_current_user
 
@@ -24,17 +24,14 @@ async def upload_csv(
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a CSV file.")
 
-    # Read with size limit
     content = await file.read(MAX_UPLOAD_SIZE + 1)
     if len(content) > MAX_UPLOAD_SIZE:
         raise HTTPException(status_code=413, detail="File too large. Maximum size is 5MB.")
 
-    # Sanity check: first line should look like a CSV header
     first_line = content.split(b"\n")[0].decode("utf-8", errors="ignore").strip()
     if "," not in first_line:
         raise HTTPException(status_code=400, detail="File does not appear to be a valid CSV.")
 
-    # Duplicate detection
     file_hash = _csv_hash(content)
     existing = await tx_collection.find_one({
         "user_id": current_user["id"],
@@ -51,15 +48,19 @@ async def upload_csv(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    # Categorize all descriptions in one batch API call
+    descriptions = [str(row["Description"]) for _, row in df.iterrows()]
+    categories = categorize_batch(descriptions)
+
     records = []
-    for _, row in df.iterrows():
+    for i, (_, row) in enumerate(df.iterrows()):
         records.append({
             "user_id": current_user["id"],
             "file_hash": file_hash,
             "Date": pd.to_datetime(row["Date"]),
             "Description": str(row["Description"]),
             "Amount": float(row["Amount"]),
-            "Category": categorize_text(str(row["Description"])),
+            "Category": categories[i],
         })
 
     if records:
@@ -118,3 +119,21 @@ async def list_months(current_user: dict = Depends(get_current_user)):
 async def clear_transactions(current_user: dict = Depends(get_current_user)):
     result = await tx_collection.delete_many({"user_id": current_user["id"]})
     return {"deleted": result.deleted_count}
+
+
+@router.patch("/transactions/{description}")
+async def update_category(
+    description: str,
+    body: dict,
+    current_user: dict = Depends(get_current_user),
+):
+    """Update category for all transactions matching a description."""
+    new_category = body.get("category")
+    if not new_category:
+        raise HTTPException(status_code=400, detail="Category is required.")
+
+    result = await tx_collection.update_many(
+        {"user_id": current_user["id"], "Description": description},
+        {"$set": {"Category": new_category}}
+    )
+    return {"updated": result.modified_count}

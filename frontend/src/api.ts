@@ -110,3 +110,8 @@ export const fetchRecurring = async (): Promise<RecurringItem[]> => {
   const { data } = await api.get<{ items: RecurringItem[] }>('/recurring')
   return data.items
 }
+
+export const updateCategory = async (description: string, category: string) => {
+  const { data } = await api.patch(`/transactions/${encodeURIComponent(description)}/category`, { category })
+  return data
+}

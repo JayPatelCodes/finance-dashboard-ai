@@ -1,5 +1,9 @@
 import { useState, useMemo } from 'react'
 import type { Tx } from '../api'
+import { updateCategory } from '../api'
+
+const CATEGORIES = ['Groceries', 'Dining', 'Transportation', 'Utilities', 'Rent', 'Entertainment', 'Other']
+const FILTER_CATEGORIES = ['All', ...CATEGORIES]
 
 function exportToCsv(items: Tx[]) {
   const header = 'Date,Description,Category,Amount'
@@ -15,12 +19,59 @@ function exportToCsv(items: Tx[]) {
   URL.revokeObjectURL(url)
 }
 
-const CATEGORIES = ['All', 'Groceries', 'Dining', 'Transportation', 'Utilities', 'Rent', 'Entertainment', 'Other']
+function CategoryBadge({ tx, onUpdate }: { tx: Tx; onUpdate: (desc: string, cat: string) => void }) {
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
 
-export default function TransactionsTable({ items }: { items: Tx[] }) {
+  const handleChange = async (newCat: string) => {
+    setSaving(true)
+    setEditing(false)
+    await updateCategory(tx.Description, newCat)
+    onUpdate(tx.Description, newCat)
+    setSaving(false)
+  }
+
+  if (editing) {
+    return (
+      <select
+        className="input"
+        style={{ fontSize: 11, padding: '2px 6px', height: 'auto', width: 130 }}
+        defaultValue={tx.Category}
+        onChange={e => handleChange(e.target.value)}
+        onBlur={() => setEditing(false)}
+        autoFocus
+      >
+        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+      </select>
+    )
+  }
+
+  return (
+    <span
+      className={`badge ${tx.Category.toLowerCase().replace(/\s+/g, '-')}`}
+      onClick={() => setEditing(true)}
+      title="Click to edit category"
+      style={{ cursor: 'pointer', opacity: saving ? 0.5 : 1 }}
+    >
+      {saving ? '…' : tx.Category}
+    </span>
+  )
+}
+
+export default function TransactionsTable({ items: initialItems }: { items: Tx[] }) {
+  const [items, setItems] = useState<Tx[]>(initialItems)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
   const [amountFilter, setAmountFilter] = useState<'all' | 'income' | 'expense'>('all')
+
+  // Sync if parent passes new items (e.g. month change)
+  useMemo(() => setItems(initialItems), [initialItems])
+
+  const handleCategoryUpdate = (description: string, newCategory: string) => {
+    setItems(prev => prev.map(t =>
+      t.Description === description ? { ...t, Category: newCategory } : t
+    ))
+  }
 
   const filtered = useMemo(() => {
     return items.filter(t => {
@@ -54,42 +105,25 @@ export default function TransactionsTable({ items }: { items: Tx[] }) {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <select
-          className="input"
-          style={{ width: 140 }}
-          value={category}
-          onChange={e => setCategory(e.target.value)}
-        >
-          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+        <select className="input" style={{ width: 140 }} value={category} onChange={e => setCategory(e.target.value)}>
+          {FILTER_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
-        <select
-          className="input"
-          style={{ width: 120 }}
-          value={amountFilter}
-          onChange={e => setAmountFilter(e.target.value as any)}
-        >
+        <select className="input" style={{ width: 120 }} value={amountFilter} onChange={e => setAmountFilter(e.target.value as any)}>
           <option value="all">All</option>
           <option value="income">Income</option>
           <option value="expense">Expenses</option>
         </select>
-        <button
-          className="button"
-          onClick={() => exportToCsv(filtered)}
-          disabled={filtered.length === 0}
-          title="Export filtered transactions to CSV"
-        >
+        <button className="button" onClick={() => exportToCsv(filtered)} disabled={filtered.length === 0} title="Export to CSV">
           ↓ Export
         </button>
       </div>
 
-      {/* Result count */}
       <div style={{ fontSize: 11, color: 'var(--text-dim)', marginBottom: 10 }}>
         {filtered.length === items.length
-          ? `${items.length} transactions`
+          ? `${items.length} transactions · click a category badge to edit`
           : `${filtered.length} of ${items.length} transactions`}
       </div>
 
-      {/* Table */}
       <div style={{ maxHeight: 420, overflowY: 'auto' }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-dim)', fontSize: 13 }}>
@@ -118,9 +152,7 @@ export default function TransactionsTable({ items }: { items: Tx[] }) {
                       {t.Description}
                     </td>
                     <td>
-                      <span className={`badge ${t.Category.toLowerCase().replace(/\s+/g, '-')}`}>
-                        {t.Category}
-                      </span>
+                      <CategoryBadge tx={t} onUpdate={handleCategoryUpdate} />
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <span className={t.Amount < 0 ? 'amount-negative' : 'amount-positive'}>
