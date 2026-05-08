@@ -42,7 +42,7 @@ def categorize_batch(descriptions: list[str]) -> list[str]:
             model="gemini-2.5-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
-                max_output_tokens=500,
+                max_output_tokens=2048,
                 temperature=0,
             ),
         )
