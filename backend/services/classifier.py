@@ -42,6 +42,7 @@ def categorize_batch(descriptions: list[str]) -> list[str]:
             model="gemini-2.5-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
+                # 2048 tokens accommodates up to around 100 categorized transactions per batch
                 max_output_tokens=2048,
                 temperature=0,
             ),
