@@ -46,7 +46,7 @@ async def on_startup():
 async def health():
     return {"status": "ok"}
 
-
+# List of routers
 app.include_router(transactions.router, prefix="/api")
 app.include_router(insights.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
