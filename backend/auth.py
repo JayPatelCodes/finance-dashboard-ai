@@ -8,7 +8,10 @@ from fastapi.security import OAuth2PasswordBearer
 from database import db
 from bson import ObjectId
 
-SECRET_KEY = os.getenv("JWT_SECRET", "change-this-in-production-please")
+SECRET_KEY = os.environ.get("JWT_SECRET")
+if not SECRET_KEY:
+    raise RuntimeError("JWT_SECRET environment variable is not set. Set it before starting the server.")
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
@@ -43,6 +46,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
         if user_id is None:
             raise credentials_exception
     except JWTError:
+        raise credentials_exception
+
+    # Check token blacklist
+    blacklisted = await db["token_blacklist"].find_one({"token": token})
+    if blacklisted:
         raise credentials_exception
 
     try:
