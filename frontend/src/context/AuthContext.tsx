@@ -58,7 +58,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(newUser)
   }
 
-  const logout = () => {
+  const logout = async () => {
+    const stored = localStorage.getItem('finai_token')
+    if (stored) {
+      try {
+        await axios.post(`${baseURL}/auth/logout`, {}, {
+          headers: { Authorization: `Bearer ${stored}` }
+        })
+      } catch {
+        // Continue with local logout even if server call fails
+      }
+    }
     localStorage.removeItem('finai_token')
     setToken(null)
     setUser(null)

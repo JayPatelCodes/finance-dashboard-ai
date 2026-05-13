@@ -51,6 +51,24 @@ export default function SettingsPage({ onDataCleared }: Props) {
 
 
 
+        {/* AI Data Processing Disclosure */}
+        <div className="card">
+          <h3>AI Data Processing</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 10px' }}>
+            FinAI uses Google Gemini to power transaction categorization and the financial chatbot.
+          </p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 10px' }}>
+            When you upload a CSV, your transaction descriptions are sent to Google Gemini for classification. When you use the chatbot, a summary of your financial data including total income, spending by category, and recent transactions is included in each request.
+          </p>
+          <p style={{ color: 'var(--text-dim)', fontSize: 12, margin: 0 }}>
+            This data is processed according to{' '}
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>
+              Google's Privacy Policy
+            </a>
+            . No data is sold or shared with third parties beyond Google's API infrastructure.
+          </p>
+        </div>
+
         {/* Danger zone */}
         <div className="card" style={{ borderColor: 'rgba(240,92,92,0.2)' }}>
           <h3 style={{ color: 'var(--red)' }}>Danger Zone</h3>
