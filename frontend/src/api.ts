@@ -7,7 +7,7 @@ const api = axios.create({ baseURL })
 // Always read fresh from localStorage so token is never stale
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('finai_token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  if (token) config.headers = { ...config.headers, Authorization: `Bearer ${token}` }
   return config
 })
 

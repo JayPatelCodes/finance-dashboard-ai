@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import axios from 'axios'
 
 export type User = {
@@ -49,7 +50,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .catch(() => {
         localStorage.removeItem('finai_token')
       })
-      .finally(() => setLoading(false))
+      .then(() => setLoading(false))
+      .catch(() => setLoading(false))
   }, [])
 
   const login = (newToken: string, newUser: User) => {

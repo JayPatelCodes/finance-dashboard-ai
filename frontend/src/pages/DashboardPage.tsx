@@ -1,8 +1,5 @@
-import { useState } from 'react'
-import UploadArea from '../components/UploadArea'
 import TransactionsTable from '../components/TransactionsTable'
 import Charts from '../components/Charts'
-import { fetchTransactions } from '../api'
 import type { Tx, ForecastData } from '../api'
 
 type Props = {
