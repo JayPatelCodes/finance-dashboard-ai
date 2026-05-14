@@ -9,6 +9,7 @@ numpy
 python-dotenv
 google-genai
 python-jose[cryptography]
-passlib[bcrypt]==4.0.1
+passlib[bcrypt]
+bcrypt==4.0.1
 httpx
 slowapi
