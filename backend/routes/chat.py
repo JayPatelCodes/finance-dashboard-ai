@@ -76,7 +76,7 @@ Here is the user's financial data:
             contents=req.question,
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt,
-                max_output_tokens=512,
+                max_output_tokens=1024,
                 temperature=0.7,
             ),
         )
