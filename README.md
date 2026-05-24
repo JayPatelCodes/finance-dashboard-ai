@@ -7,11 +7,11 @@ A full-stack personal finance dashboard where users can upload bank transaction 
 ## Table of Contents
 
 1. [Description](#description)
-2. [Features](#features)
-3. [Tech Stack](#tech-stack)
-4. [Installation](#installation)
-5. [Usage](#usage)
-6. [Security](#security)
+2. [Security](#security)
+3. [Features](#features)
+4. [Tech Stack](#tech-stack)
+5. [Installation](#installation)
+6. [Usage](#usage)
 7. [Demo Video](#demo-video)
 
 ---
