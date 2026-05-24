@@ -1,22 +1,20 @@
 import { useRef, useState, useEffect } from 'react'
 import { uploadCsv } from '../api'
+import toast from 'react-hot-toast'
 
 export default function UploadArea({ onUploaded }: { onUploaded: () => void }) {
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
   const [showTip, setShowTip] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // Animate progress bar during upload
   useEffect(() => {
     if (loading) {
       setProgress(5)
       progressRef.current = setInterval(() => {
         setProgress(prev => {
-          // Slow down as it approaches 90% — final jump happens on completion
           if (prev >= 90) return prev
           const increment = prev < 50 ? 4 : prev < 75 ? 2 : 0.5
           return Math.min(prev + increment, 90)
@@ -35,27 +33,26 @@ export default function UploadArea({ onUploaded }: { onUploaded: () => void }) {
   const handleFile = (f: File | null) => {
     if (!f) return
     setFile(f)
-    setMsg(null)
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     const f = e.dataTransfer.files[0]
     if (f?.name.toLowerCase().endsWith('.csv')) handleFile(f)
-    else setMsg({ text: 'Please drop a .csv file', type: 'error' })
+    else toast.error('Please drop a .csv file')
   }
 
   const handleUpload = async () => {
     if (!file) return
     setLoading(true)
-    setMsg(null)
     try {
       const res = await uploadCsv(file)
-      setMsg({ text: `✓ ${res.inserted} transactions imported`, type: 'success' })
+      toast.success(`${res.inserted} transactions imported`)
       setFile(null)
       onUploaded()
     } catch (e: any) {
-      setMsg({ text: e?.response?.data?.detail || 'Upload failed', type: 'error' })
+      const msg = e?.response?.data?.detail || 'Upload failed'
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -63,7 +60,6 @@ export default function UploadArea({ onUploaded }: { onUploaded: () => void }) {
 
   return (
     <div>
-      {/* Drop zone */}
       <div
         className="upload-drop-zone"
         onClick={() => !loading && inputRef.current?.click()}
@@ -86,15 +82,9 @@ export default function UploadArea({ onUploaded }: { onUploaded: () => void }) {
         />
       </div>
 
-      {/* Progress bar */}
       {(loading || progress > 0) && (
         <div style={{ marginBottom: 8 }}>
-          <div style={{
-            height: 4,
-            background: 'rgba(255,255,255,0.06)',
-            borderRadius: 4,
-            overflow: 'hidden',
-          }}>
+          <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 4, overflow: 'hidden' }}>
             <div style={{
               height: '100%',
               width: `${progress}%`,
@@ -111,7 +101,6 @@ export default function UploadArea({ onUploaded }: { onUploaded: () => void }) {
         </div>
       )}
 
-      {/* Upload button + CSV tip */}
       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
         <button
           className="button button-primary"
@@ -122,7 +111,6 @@ export default function UploadArea({ onUploaded }: { onUploaded: () => void }) {
           {loading ? 'Importing…' : 'Import Transactions'}
         </button>
 
-        {/* ? tooltip */}
         <div style={{ position: 'relative' }}>
           <button
             style={{
@@ -130,14 +118,9 @@ export default function UploadArea({ onUploaded }: { onUploaded: () => void }) {
               background: 'rgba(255,255,255,0.06)',
               border: '1px solid var(--border)',
               color: 'var(--text-muted)',
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontFamily: 'DM Sans, sans-serif',
-              flexShrink: 0,
+              cursor: 'pointer', fontSize: 13, fontWeight: 600,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'DM Sans, sans-serif', flexShrink: 0,
             }}
             onMouseEnter={() => setShowTip(true)}
             onMouseLeave={() => setShowTip(false)}
@@ -145,19 +128,11 @@ export default function UploadArea({ onUploaded }: { onUploaded: () => void }) {
 
           {showTip && (
             <div style={{
-              position: 'absolute',
-              bottom: 'calc(100% + 8px)',
-              right: 0,
-              width: 220,
-              background: '#0e1530',
-              border: '1px solid var(--border-strong)',
-              borderRadius: 10,
-              padding: '10px 12px',
-              fontSize: 12,
-              color: 'var(--text-muted)',
-              lineHeight: 1.5,
-              zIndex: 200,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+              position: 'absolute', bottom: 'calc(100% + 8px)', right: 0,
+              width: 220, background: '#0e1530',
+              border: '1px solid var(--border-strong)', borderRadius: 10,
+              padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)',
+              lineHeight: 1.5, zIndex: 200, boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
             }}>
               <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>CSV Format</div>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 11, color: 'var(--accent)', marginBottom: 6 }}>
@@ -168,12 +143,6 @@ export default function UploadArea({ onUploaded }: { onUploaded: () => void }) {
           )}
         </div>
       </div>
-
-      {msg && (
-        <div className={`upload-msg ${msg.type}`} style={{ marginTop: 8 }}>
-          {msg.text}
-        </div>
-      )}
     </div>
   )
 }

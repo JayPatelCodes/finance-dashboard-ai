@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { clearTransactions } from '../api'
@@ -8,16 +9,14 @@ export default function SettingsPage({ onDataCleared }: Props) {
   const { user } = useAuth()
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const [clearing, setClearing] = useState(false)
-  const [cleared, setCleared] = useState(false)
 
   const handleClear = async () => {
     setClearing(true)
     await clearTransactions()
     setClearing(false)
     setShowClearConfirm(false)
-    setCleared(true)
     onDataCleared()
-    setTimeout(() => setCleared(false), 3000)
+    toast.success('All transaction data cleared')
   }
 
   return (
@@ -94,7 +93,7 @@ export default function SettingsPage({ onDataCleared }: Props) {
               )}
             </div>
           </div>
-          {cleared && <p style={{ color: 'var(--green)', fontSize: 13, margin: '12px 0 0' }}>✓ All data cleared.</p>}
+          
         </div>
 
       </div>

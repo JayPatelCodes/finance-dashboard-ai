@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast'
 import { useState, useEffect } from 'react'
 import { signup, login, googleAuth } from './api'
 import { useAuth } from './context/AuthContext'
@@ -44,7 +45,9 @@ export default function AuthPage() {
       const res = await googleAuth(response.credential)
       authLogin(res.access_token, res.user)
     } catch (e: any) {
-      setError(e?.response?.data?.detail || 'Google sign-in failed.')
+      const msg = e?.response?.data?.detail || 'Google sign-in failed.'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -91,7 +94,7 @@ export default function AuthPage() {
               <input
                 className="input"
                 type="text"
-                placeholder="Bob Smith"
+                placeholder="Jay Patel"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 required

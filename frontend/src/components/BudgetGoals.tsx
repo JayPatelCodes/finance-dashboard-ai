@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchBudgets, createBudget, deleteBudget } from '../api'
+import toast from 'react-hot-toast'
 
 type Budget = {
   id: string
@@ -11,9 +12,7 @@ type Budget = {
 }
 
 const CATEGORIES = ['Groceries', 'Dining', 'Transportation', 'Utilities', 'Rent', 'Entertainment', 'Other']
-
-const BAR_COLOR = (pct: number) =>
-  pct >= 100 ? '#f05c5c' : pct >= 80 ? '#f5a623' : '#22c97a'
+const BAR_COLOR = (pct: number) => pct >= 100 ? '#f05c5c' : pct >= 80 ? '#f5a623' : '#22c97a'
 
 export default function BudgetGoals({ activeMonth }: { activeMonth: string | null }) {
   const [budgets, setBudgets] = useState<Budget[]>([])
@@ -31,21 +30,32 @@ export default function BudgetGoals({ activeMonth }: { activeMonth: string | nul
   useEffect(() => { load() }, [activeMonth])
 
   const handleCreate = async () => {
-    if (!amount || isNaN(+amount) || +amount <= 0) return
+    if (!amount || isNaN(+amount) || +amount <= 0) {
+      toast.error('Please enter a valid amount')
+      return
+    }
     setLoading(true)
     try {
       await createBudget(category, +amount, isMonthly ? activeMonth : null)
       setAmount('')
       setShowForm(false)
       await load()
+      toast.success(`Budget set for ${category}`)
+    } catch (e: any) {
+      toast.error(e?.response?.data?.detail || 'Failed to save budget')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDelete = async (id: string) => {
-    await deleteBudget(id)
-    await load()
+  const handleDelete = async (id: string, cat: string) => {
+    try {
+      await deleteBudget(id)
+      await load()
+      toast.success(`${cat} budget removed`)
+    } catch {
+      toast.error('Failed to remove budget')
+    }
   }
 
   return (
@@ -56,7 +66,6 @@ export default function BudgetGoals({ activeMonth }: { activeMonth: string | nul
         </p>
       )}
 
-      {/* Budget list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
         {budgets.map(b => (
           <div key={b.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
@@ -67,36 +76,22 @@ export default function BudgetGoals({ activeMonth }: { activeMonth: string | nul
                 {!b.month && <span style={{ fontSize: 11, color: 'var(--text-dim)', marginLeft: 8 }}>every month</span>}
               </div>
               <button
-                onClick={() => handleDelete(b.id)}
+                onClick={() => handleDelete(b.id, b.category)}
                 style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontSize: 14, padding: '0 4px' }}
                 title="Remove budget"
               >✕</button>
             </div>
-
-            {/* Progress bar */}
             <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 6, height: 6, overflow: 'hidden', marginBottom: 6 }}>
-              <div style={{
-                width: `${b.percent}%`,
-                height: '100%',
-                background: BAR_COLOR(b.percent),
-                borderRadius: 6,
-                transition: 'width 0.4s ease',
-              }} />
+              <div style={{ width: `${b.percent}%`, height: '100%', background: BAR_COLOR(b.percent), borderRadius: 6, transition: 'width 0.4s ease' }} />
             </div>
-
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-              <span style={{ color: BAR_COLOR(b.percent), fontFamily: 'DM Mono, monospace' }}>
-                ${b.spent.toFixed(2)} spent
-              </span>
-              <span style={{ color: 'var(--text-dim)', fontFamily: 'DM Mono, monospace' }}>
-                ${b.amount.toFixed(2)} limit
-              </span>
+              <span style={{ color: BAR_COLOR(b.percent), fontFamily: 'DM Mono, monospace' }}>${b.spent.toFixed(2)} spent</span>
+              <span style={{ color: 'var(--text-dim)', fontFamily: 'DM Mono, monospace' }}>${b.amount.toFixed(2)} limit</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Add form */}
       {showForm ? (
         <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: 10, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <select className="input" value={category} onChange={e => setCategory(e.target.value)}>

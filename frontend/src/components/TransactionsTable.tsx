@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import type { Tx } from '../api'
 import { updateCategory } from '../api'
+import toast from 'react-hot-toast'
 
 const CATEGORIES = ['Groceries', 'Dining', 'Transportation', 'Utilities', 'Rent', 'Entertainment', 'Other']
 const FILTER_CATEGORIES = ['All', ...CATEGORIES]
@@ -17,6 +18,7 @@ function exportToCsv(items: Tx[]) {
   a.download = 'transactions.csv'
   a.click()
   URL.revokeObjectURL(url)
+  toast.success('Transactions exported')
 }
 
 function CategoryBadge({ tx, onUpdate }: { tx: Tx; onUpdate: (desc: string, cat: string) => void }) {
@@ -26,9 +28,15 @@ function CategoryBadge({ tx, onUpdate }: { tx: Tx; onUpdate: (desc: string, cat:
   const handleChange = async (newCat: string) => {
     setSaving(true)
     setEditing(false)
-    await updateCategory(tx.Description, newCat)
-    onUpdate(tx.Description, newCat)
-    setSaving(false)
+    try {
+      await updateCategory(tx.Description, newCat)
+      onUpdate(tx.Description, newCat)
+      toast.success(`Category updated to ${newCat}`)
+    } catch {
+      toast.error('Failed to update category')
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (editing) {
@@ -64,7 +72,6 @@ export default function TransactionsTable({ items: initialItems }: { items: Tx[]
   const [category, setCategory] = useState('All')
   const [amountFilter, setAmountFilter] = useState<'all' | 'income' | 'expense'>('all')
 
-  // Sync if parent passes new items (e.g. month change)
   useMemo(() => setItems(initialItems), [initialItems])
 
   const handleCategoryUpdate = (description: string, newCategory: string) => {
@@ -96,7 +103,6 @@ export default function TransactionsTable({ items: initialItems }: { items: Tx[]
 
   return (
     <div>
-      {/* Filter bar */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
         <input
           className="input"
@@ -151,9 +157,7 @@ export default function TransactionsTable({ items: initialItems }: { items: Tx[]
                     <td style={{ fontWeight: 500, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {t.Description}
                     </td>
-                    <td>
-                      <CategoryBadge tx={t} onUpdate={handleCategoryUpdate} />
-                    </td>
+                    <td><CategoryBadge tx={t} onUpdate={handleCategoryUpdate} /></td>
                     <td style={{ textAlign: 'right' }}>
                       <span className={t.Amount < 0 ? 'amount-negative' : 'amount-positive'}>
                         {t.Amount < 0 ? '-' : '+'}${Math.abs(t.Amount).toFixed(2)}
