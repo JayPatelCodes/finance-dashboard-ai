@@ -25,15 +25,83 @@ function fmtMonth(m: string) {
   return new Date(+y, +mo - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 }
 
+function WelcomeState() {
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '80px 24px',
+      textAlign: 'center',
+      gap: 24,
+    }}>
+      <div style={{ fontSize: 56 }}>✦</div>
+      <div>
+        <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 600, color: 'var(--text)' }}>
+          Welcome to FinAI
+        </h2>
+        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: 15, maxWidth: 400 }}>
+          Upload your first CSV file to get started. Your transactions will be automatically categorized and visualized.
+        </p>
+      </div>
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: 16,
+        maxWidth: 560,
+        width: '100%',
+        marginTop: 8,
+      }}>
+        {[
+          { icon: '⇪', title: 'Upload CSV', desc: 'Import your bank transactions using the button in the sidebar' },
+          { icon: '◎', title: 'Auto-categorize', desc: 'Gemini AI automatically sorts transactions into spending categories' },
+          { icon: '✦', title: 'Chat with AI', desc: 'Ask the chatbot questions about your spending and get personalized insights' },
+        ].map(({ icon, title, desc }) => (
+          <div key={title} style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: 14,
+            padding: '20px 16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}>
+            <div style={{ fontSize: 24 }}>{icon}</div>
+            <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{title}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>{desc}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{
+        background: 'rgba(79,142,247,0.08)',
+        border: '1px solid rgba(79,142,247,0.2)',
+        borderRadius: 10,
+        padding: '12px 20px',
+        fontSize: 13,
+        color: 'var(--accent)',
+        maxWidth: 400,
+      }}>
+        Your CSV needs three columns: <strong>Date</strong>, <strong>Description</strong>, and <strong>Amount</strong>. Negative amounts are expenses, positive are income.
+      </div>
+    </div>
+  )
+}
+
 export default function DashboardPage({
   tx, insights, months, activeMonth, forecast,
   onMonthChange, onRefresh, showYearPicker, setShowYearPicker
 }: Props) {
+
+  const hasData = tx.length > 0 || months.length > 0
+
   return (
     <div>
-      {/* Centered month navigator */}
-      <header className="main-header">
-        {months.length > 0 ? (
+      {/* Month navigator, which only shows up when there's data */}
+      {months.length > 0 ? (
+        <header className="main-header">
           <div className="month-nav-header">
             <button
               className="month-nav-arrow"
@@ -101,15 +169,14 @@ export default function DashboardPage({
               }}
             >›</button>
           </div>
-        ) : (
-          <div style={{ textAlign: 'center' }}>
-            <h1>Financial Overview</h1>
-            <p className="header-meta">Upload a CSV to get started.</p>
-          </div>
-        )}
-      </header>
+        </header>
+      ) : (
+        <header className="main-header" style={{ textAlign: 'center', marginBottom: 0 }}>
+          <h1>Financial Overview</h1>
+        </header>
+      )}
 
-      {/* Quick insights strip */}
+      {/* Insights strip */}
       {insights.length > 0 && (
         <div className="insights-strip">
           {insights.map((i, idx) => (
@@ -121,16 +188,21 @@ export default function DashboardPage({
         </div>
       )}
 
-      <div className="dashboard-grid">
-        <div className="card">
-          <h3>Spending Analysis</h3>
-          <Charts items={tx} forecast={forecast} />
+      {/* Main content */}
+      {!hasData ? (
+        <WelcomeState />
+      ) : (
+        <div className="dashboard-grid">
+          <div className="card">
+            <h3>Spending Analysis</h3>
+            <Charts items={tx} forecast={forecast} />
+          </div>
+          <div className="card">
+            <h3>Transaction History</h3>
+            <TransactionsTable items={tx} />
+          </div>
         </div>
-        <div className="card">
-          <h3>Transaction History</h3>
-          <TransactionsTable items={tx} />
-        </div>
-      </div>
+      )}
     </div>
   )
 }
