@@ -21,8 +21,10 @@ export default function App() {
   const [activeMonth, setActiveMonth] = useState<string | null>(null)
   const [forecast, setForecast] = useState<ForecastData>({ points: [], summary: '' })
   const [showYearPicker, setShowYearPicker] = useState(false)
+  const [dataLoading, setDataLoading] = useState(true)
 
   const refresh = async (month?: string | null) => {
+    setDataLoading(true)
     const [items, ins, ms, fc] = await Promise.all([
       fetchTransactions(month ?? undefined),
       fetchInsights(),
@@ -33,6 +35,7 @@ export default function App() {
     setInsights(ins)
     setMonths(ms)
     setForecast(fc)
+    setDataLoading(false)
     if (month === undefined && ms.length > 0 && !activeMonth) {
       const latest = ms[ms.length - 1]
       setActiveMonth(latest)
@@ -75,6 +78,7 @@ export default function App() {
       <AppLayout activePage={page} onNavigate={setPage} onUploaded={() => refresh(activeMonth)}>
         {page === 'dashboard' && (
           <DashboardPage
+            dataLoading={dataLoading}
             tx={tx}
             insights={insights}
             months={months}

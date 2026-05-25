@@ -1,5 +1,6 @@
 import TransactionsTable from '../components/TransactionsTable'
 import Charts from '../components/Charts'
+import { SkeletonCharts, SkeletonTable, SkeletonInsights } from '../components/Skeleton'
 import type { Tx, ForecastData } from '../api'
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
   onRefresh: (month?: string | null) => void
   showYearPicker: boolean
   setShowYearPicker: (v: boolean | ((prev: boolean) => boolean)) => void
+  dataLoading: boolean
 }
 
 const INSIGHT_LABELS: Record<string, string> = {
@@ -93,13 +95,13 @@ function WelcomeState() {
 export default function DashboardPage({
   tx, insights, months, activeMonth, forecast,
   onMonthChange, onRefresh, showYearPicker, setShowYearPicker
-}: Props) {
+, dataLoading}: Props) {
 
   const hasData = tx.length > 0 || months.length > 0
 
   return (
     <div>
-      {/* Month navigator, which only shows up when there's data */}
+      {/* Month navigator, which only show when there's data */}
       {months.length > 0 ? (
         <header className="main-header">
           <div className="month-nav-header">
@@ -177,7 +179,7 @@ export default function DashboardPage({
       )}
 
       {/* Insights strip */}
-      {insights.length > 0 && (
+      {dataLoading ? <SkeletonInsights /> : insights.length > 0 && (
         <div className="insights-strip">
           {insights.map((i, idx) => (
             <div key={idx} className="insight-chip">
@@ -189,7 +191,12 @@ export default function DashboardPage({
       )}
 
       {/* Main content */}
-      {!hasData ? (
+      {dataLoading ? (
+        <div className="dashboard-grid">
+          <div className="card"><h3>Spending Analysis</h3><SkeletonCharts /></div>
+          <div className="card"><h3>Transaction History</h3><SkeletonTable /></div>
+        </div>
+      ) : !hasData ? (
         <WelcomeState />
       ) : (
         <div className="dashboard-grid">
