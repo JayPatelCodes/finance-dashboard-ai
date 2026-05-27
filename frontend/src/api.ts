@@ -70,7 +70,7 @@ export const fetchForecast = async () => {
   return data
 }
 
-// ── Budgets ────────────────────────────────────────────────────────────────
+// Budgets
 
 export type Budget = {
   id: string
@@ -96,7 +96,7 @@ export const deleteBudget = async (id: string) => {
   return data
 }
 
-// ── Recurring ──────────────────────────────────────────────────────────────
+// Recurring
 
 export type RecurringItem = {
   description: string

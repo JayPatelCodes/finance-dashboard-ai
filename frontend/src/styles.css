@@ -34,7 +34,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Layout ── */
+/* Layout */
 .app-layout {
   display: flex;
   min-height: 100vh;
@@ -61,7 +61,7 @@ body {
   min-width: 0;
 }
 
-/* ── Brand ── */
+/* Brand */
 .brand {
   font-size: 20px;
   font-weight: 600;
@@ -80,7 +80,7 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Sidebar sections ── */
+/* Sidebar sections */
 .sidebar-section h3 {
   font-size: 10px;
   font-weight: 600;
@@ -90,7 +90,7 @@ body {
   margin: 0 0 12px;
 }
 
-/* ── Cards ── */
+/* Cards */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -109,7 +109,7 @@ body {
   font-size: 10px;
 }
 
-/* ── Mini insight cards ── */
+/* Mini insight cards */
 .insight-list {
   display: flex;
   flex-direction: column;
@@ -152,7 +152,7 @@ body {
   margin: 0;
 }
 
-/* ── Main header ── */
+/* Main header */
 .main-header {
   margin-bottom: 28px;
 }
@@ -170,14 +170,14 @@ body {
   font-size: 14px;
 }
 
-/* ── Dashboard grid ── */
+/* Dashboard grid */
 .dashboard-grid {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* ── Charts grid (inside Charts component) ── */
+/* Charts grid (inside Charts component) */
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -191,7 +191,7 @@ body {
   padding: 0;
 }
 
-/* ── Buttons ── */
+/* Buttons */
 .button {
   display: inline-flex;
   align-items: center;
@@ -231,7 +231,7 @@ body {
   background: var(--accent-gradient);
 }
 
-/* ── Inputs ── */
+/* Inputs */
 .input {
   width: 100%;
   padding: 9px 12px;
@@ -258,7 +258,7 @@ body {
   display: none;
 }
 
-/* ── Table ── */
+/* Table */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -294,7 +294,7 @@ body {
   color: var(--text);
 }
 
-/* ── Badge ── */
+/* Badge */
 .badge {
   display: inline-block;
   padding: 3px 9px;
@@ -316,11 +316,11 @@ body {
 .badge.income     { background: rgba(34, 201, 122, 0.15); color: #22c97a; }
 .badge.food       { background: rgba(245, 166, 35, 0.15); color: #f5a623; }
 
-/* ── Amount colors ── */
+/* Amount colors */
 .amount-positive { color: var(--green); font-family: 'DM Mono', monospace; }
 .amount-negative { color: var(--red); font-family: 'DM Mono', monospace; }
 
-/* ── Chatbot ── */
+/* Chatbot */
 .chatbot-wrapper {
   position: fixed;
   bottom: 28px;
@@ -478,7 +478,7 @@ body {
   color: var(--text);
 }
 
-/* ── Upload area ── */
+/* Upload area */
 .upload-drop-zone {
   border: 1.5px dashed var(--border-strong);
   border-radius: var(--radius-sm);
@@ -522,7 +522,7 @@ body {
   color: var(--red);
 }
 
-/* ── Recharts overrides ── */
+/* Recharts overrides */
 .recharts-text { fill: var(--text-muted) !important; font-family: 'DM Sans', sans-serif !important; font-size: 11px !important; }
 .recharts-cartesian-grid-horizontal line,
 .recharts-cartesian-grid-vertical line { stroke: var(--border) !important; }
@@ -532,12 +532,12 @@ body {
   border-radius: 10px !important;
 }
 
-/* ── Scrollbar ── */
+/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 
-/* ── Auth page ── */
+/* Auth page */
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -626,7 +626,7 @@ body {
 }
 .auth-switch-btn:hover { text-decoration: underline; }
 
-/* ── Sidebar user block ── */
+/* Sidebar user block */
 .sidebar-user {
   display: flex;
   align-items: center;
@@ -635,6 +635,12 @@ body {
   background: rgba(255,255,255,0.03);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+}
+
+/* Collapsed sidebar profile fix */
+.sidebar.collapsed .sidebar-user {
+  justify-content: center;
+  padding: 8px;
 }
 
 .user-avatar {
@@ -655,7 +661,7 @@ body {
 .user-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .user-email { font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* ── Month selector ── */
+/* Month selector */
 .month-list { display: flex; flex-direction: column; gap: 4px; }
 
 .month-btn {
@@ -674,7 +680,7 @@ body {
 .month-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
 .month-btn.active { background: rgba(79,142,247,0.12); color: var(--accent); font-weight: 500; }
 
-/* ── Sidebar footer ── */
+/* Sidebar footer */
 .sidebar-footer {
   margin-top: auto;
   padding-top: 16px;
@@ -692,7 +698,7 @@ body {
 .danger-btn-ghost { background: none; border: none; color: var(--text-dim); font-size: 12px; padding: 6px 0; text-align: left; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 .danger-btn-ghost:hover { color: var(--red); }
 
-/* ── Header meta ── */
+/* Header meta */
 .header-meta {
   margin: 4px 0 0;
   color: var(--text-muted);
@@ -700,7 +706,7 @@ body {
   font-family: 'DM Mono', monospace;
 }
 
-/* ── Select dropdown dark theme fix ── */
+/* Select dropdown dark theme fix */
 select.input {
   appearance: none;
   -webkit-appearance: none;
@@ -717,7 +723,7 @@ select.input option {
   color: #e8eeff;
 }
 
-/* ── Month arrow navigation ── */
+/* Month arrow navigation */
 .month-nav {
   display: flex;
   align-items: center;
@@ -770,7 +776,7 @@ select.input option {
   background: rgba(255,255,255,0.06);
 }
 
-/* ── Year picker dropdown ── */
+/* Year picker dropdown */
 .year-picker {
   position: absolute;
   top: calc(100% + 8px);
@@ -842,7 +848,7 @@ select.input option {
 .year-picker-all:hover { background: rgba(255,255,255,0.06); color: var(--text); }
 .year-picker-all.active { color: var(--accent); border-color: rgba(79,142,247,0.3); }
 
-/* ── Centered month navigator in header ── */
+/* Centered month navigator in header */
 .month-nav-header {
   display: flex;
   align-items: center;
@@ -907,7 +913,7 @@ select.input option {
   text-align: center;
 }
 
-/* ── Collapsible sidebar ── */
+/* Collapsible sidebar */
 .sidebar {
   transition: width 0.2s ease;
 }
@@ -943,7 +949,7 @@ select.input option {
 
 .collapse-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
 
-/* ── Sidebar nav ── */
+/* Sidebar nav */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -976,7 +982,7 @@ select.input option {
 .nav-icon { font-size: 16px; flex-shrink: 0; }
 .nav-label { flex: 1; }
 
-/* ── Insights strip on dashboard ── */
+/* Insights strip on dashboard */
 .insights-strip {
   display: flex;
   gap: 12px;
@@ -1011,7 +1017,7 @@ select.input option {
   font-family: 'DM Mono', monospace;
 }
 
-/* ── Settings page ── */
+/* Settings page */
 .settings-row {
   display: flex;
   align-items: flex-start;
@@ -1019,7 +1025,7 @@ select.input option {
   margin-top: 12px;
 }
 
-/* ── Upload progress bar ── */
+/* Upload progress bar */
 .upload-progress-track {
   height: 4px;
   background: rgba(255,255,255,0.06);
@@ -1035,7 +1041,7 @@ select.input option {
   transition: width 0.2s ease;
 }
 
-/* ── CSV format tooltip ── */
+/* CSV format tooltip */
 .tooltip-trigger {
   width: 22px;
   height: 22px;
@@ -1075,7 +1081,7 @@ select.input option {
   font-size: 12px;
 }
 
-/* ── Skeleton loader ── */
+/* Skeleton loader */
 @keyframes shimmer {
   0% { background-position: -600px 0; }
   100% { background-position: 600px 0; }
