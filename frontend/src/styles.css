@@ -963,15 +963,46 @@ select.input option {
   .mobile-overlay { display: block; }
 
   .main-content {
-    padding: 24px 16px;
+    padding: 16px;
     padding-top: 72px;
   }
 
+  /* Month navigator */
   .month-nav-title { font-size: 20px; }
   .month-nav-header .month-nav-arrow { width: 30px; height: 30px; font-size: 16px; }
-  .dashboard-grid { gap: 16px; }
-  .insights-strip { gap: 8px; }
-  .insight-chip { min-width: 100px; }
-  .chatbot-window { width: calc(100vw - 32px); right: -14px; }
   .month-nav-header .year-picker { min-width: 180px; }
+
+  /* Insights strip */
+  .insights-strip {
+    gap: 8px;
+  }
+
+  .insight-chip {
+    min-width: 0;
+    flex: 1 1 calc(50% - 4px);
+  }
+
+  .insight-chip-value {
+    font-size: 13px;
+    word-break: break-word;
+  }
+
+  .insight-chip-label {
+    font-size: 9px;
+  }
+
+  /* Dashboard grid */
+  .dashboard-grid { gap: 16px; }
+
+  /* Charts go single column on mobile */
+  .charts-grid-2col {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Transaction table */
+  .table-amount-col { display: none; }
+  .table-category-col { min-width: 80px; }
+
+  /* Chatbot */
+  .chatbot-window { width: calc(100vw - 32px); right: -14px; }
 }

@@ -141,8 +141,8 @@ export default function TransactionsTable({ items: initialItems }: { items: Tx[]
               <tr>
                 <th>Date</th>
                 <th>Description</th>
-                <th>Category</th>
-                <th style={{ textAlign: 'right' }}>Amount</th>
+                <th className="table-category-col">Category</th>
+                <th className="table-amount-col" style={{ textAlign: 'right' }}>Amount</th>
               </tr>
             </thead>
             <tbody>
@@ -158,7 +158,7 @@ export default function TransactionsTable({ items: initialItems }: { items: Tx[]
                       {t.Description}
                     </td>
                     <td><CategoryBadge tx={t} onUpdate={handleCategoryUpdate} /></td>
-                    <td style={{ textAlign: 'right' }}>
+                    <td className="table-amount-col" style={{ textAlign: 'right' }}>
                       <span className={t.Amount < 0 ? 'amount-negative' : 'amount-positive'}>
                         {t.Amount < 0 ? '-' : '+'}${Math.abs(t.Amount).toFixed(2)}
                       </span>
