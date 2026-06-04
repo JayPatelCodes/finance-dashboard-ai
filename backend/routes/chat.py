@@ -72,7 +72,7 @@ Here is the user's financial data:
     try:
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
             contents=req.question,
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt,

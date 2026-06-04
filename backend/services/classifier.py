@@ -53,7 +53,7 @@ def categorize_batch(descriptions: list[str]) -> list[str]:
     try:
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
             contents=prompt,
             config=types.GenerateContentConfig(
                 max_output_tokens=2048,
