@@ -2,6 +2,8 @@
 
 A full-stack personal finance dashboard where users can upload bank transaction CSVs, automatically categorize spending with AI, and chat with a Gemini-powered assistant about their finances.
 
+**Live Demo:** https://finance-dashboard-ai-lemon.vercel.app/
+
 ---
 
 ## Table of Contents
