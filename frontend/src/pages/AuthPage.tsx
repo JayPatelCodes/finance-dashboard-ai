@@ -1,7 +1,7 @@
 import toast from 'react-hot-toast'
 import { useState, useEffect } from 'react'
-import { signup, login, googleAuth, guestLogin } from './api'
-import { useAuth } from './context/AuthContext'
+import { signup, login, googleAuth, guestLogin } from '../api'
+import { useAuth } from '../context/AuthContext'
 
 declare global {
   interface Window { google?: any }
