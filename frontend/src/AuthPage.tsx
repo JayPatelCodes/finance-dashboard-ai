@@ -1,6 +1,6 @@
 import toast from 'react-hot-toast'
 import { useState, useEffect } from 'react'
-import { signup, login, googleAuth } from './api'
+import { signup, login, googleAuth, guestLogin } from './api'
 import { useAuth } from './context/AuthContext'
 
 declare global {
@@ -9,14 +9,24 @@ declare global {
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 
-export default function AuthPage() {
+type Props = {
+  initialMode?: 'login' | 'signup'
+}
+
+export default function AuthPage({ initialMode = 'login' }: Props) {
   const { login: authLogin } = useAuth()
-  const [mode, setMode] = useState<'login' | 'signup'>('login')
+  const [mode, setMode] = useState<'login' | 'signup'>(initialMode)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Re-sync if parent changes initialMode (e.g. guest clicking "Sign up")
+  useEffect(() => {
+    setMode(initialMode)
+    setError('')
+  }, [initialMode])
 
   // Initialize Google Sign-In button
   useEffect(() => {
@@ -64,6 +74,19 @@ export default function AuthPage() {
       authLogin(res.access_token, res.user)
     } catch (e: any) {
       setError(e?.response?.data?.detail || 'Something went wrong.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGuest = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      const res = await guestLogin()
+      authLogin(res.access_token, res.user)
+    } catch {
+      setError('Could not start guest session. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -141,6 +164,21 @@ export default function AuthPage() {
           >
             {mode === 'login' ? 'Sign up' : 'Sign in'}
           </button>
+        </p>
+
+        <div className="auth-divider"><span>or</span></div>
+
+        <button
+          className="button auth-submit"
+          type="button"
+          onClick={handleGuest}
+          disabled={loading}
+          style={{ width: '100%', opacity: 0.85 }}
+        >
+          Continue as Guest
+        </button>
+        <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-dim)', margin: '8px 0 0' }}>
+          No account needed · data deleted after 24 hours
         </p>
       </div>
     </div>

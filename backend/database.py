@@ -14,5 +14,19 @@ db = _client[DB_NAME]
 transactions = db["transactions"]
 
 async def init_db():
-    # Useful index for ordering/aggregation
+    # Index for ordering/aggregation on transactions
     await transactions.create_index([("Date", ASCENDING)])
+
+    # TTL index: auto-delete guest users 24 hours after creation
+    # partialFilterExpression ensures real user accounts are never touched
+    await db["users"].create_index(
+        [("created_at", ASCENDING)],
+        expireAfterSeconds=86400,
+        partialFilterExpression={"is_guest": True},
+    )
+
+    # TTL index: auto-expire token blacklist entries once the token's own expiry passes
+    await db["token_blacklist"].create_index(
+        [("expires_at", ASCENDING)],
+        expireAfterSeconds=0,
+    )

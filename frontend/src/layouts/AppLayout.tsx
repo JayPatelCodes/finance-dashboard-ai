@@ -8,6 +8,7 @@ type Props = {
   activePage: Page
   onNavigate: (page: Page) => void
   onUploaded: () => void
+  onGuestSignUp: () => void
   children: React.ReactNode
 }
 
@@ -18,13 +19,15 @@ const NAV_ITEMS: { id: Page; label: string; icon: string }[] = [
   { id: 'settings', label: 'Settings', icon: '⚙' },
 ]
 
-export default function AppLayout({ activePage, onNavigate, onUploaded, children }: Props) {
+export default function AppLayout({ activePage, onNavigate, onUploaded, onGuestSignUp, children }: Props) {
   const { user, logout } = useAuth()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showUpload, setShowUpload] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
+
+  const isGuest = user?.email?.endsWith('@guest.local') ?? false
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -44,6 +47,32 @@ export default function AppLayout({ activePage, onNavigate, onUploaded, children
 
   const sidebarContent = (isMobile = false) => (
     <aside className={`sidebar ${collapsed && !isMobile ? 'collapsed' : ''} ${isMobile ? 'sidebar-mobile' : ''}`}>
+
+      {/* Guest banner */}
+      {isGuest && (!collapsed || isMobile) && (
+        <div style={{
+          background: 'rgba(245,166,35,0.1)',
+          border: '1px solid rgba(245,166,35,0.22)',
+          borderRadius: 10,
+          padding: '10px 12px',
+          marginBottom: 12,
+          fontSize: 12,
+          lineHeight: 1.5,
+        }}>
+          <div style={{ fontWeight: 600, color: '#f5a623', marginBottom: 4 }}>👤 Guest Mode</div>
+          <div style={{ color: 'var(--text-muted)', marginBottom: 8 }}>
+            Data deleted after 24 hours.
+          </div>
+          <button
+            className="button button-primary"
+            style={{ width: '100%', fontSize: 12, padding: '7px 0' }}
+            onClick={onGuestSignUp}
+          >
+            Sign up to save data →
+          </button>
+        </div>
+      )}
+
       <div className="sidebar-top">
         {(!collapsed || isMobile) && <div className="brand"><span className="brand-dot" />FinAI</div>}
         {isMobile ? (
@@ -72,7 +101,7 @@ export default function AppLayout({ activePage, onNavigate, onUploaded, children
             {(!collapsed || isMobile) && (
               <div className="user-info">
                 <div className="user-name">{user.name}</div>
-                <div className="user-email">{user.email}</div>
+                <div className="user-email">{isGuest ? 'Guest account' : user.email}</div>
               </div>
             )}
           </div>
@@ -87,7 +116,9 @@ export default function AppLayout({ activePage, onNavigate, onUploaded, children
               {(!collapsed || isMobile) && (
                 <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)' }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{user.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 2 }}>{user.email}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 2 }}>
+                    {isGuest ? 'Guest account · expires in 24h' : user.email}
+                  </div>
                 </div>
               )}
               <button

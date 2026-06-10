@@ -1,11 +1,16 @@
 import os
+import logging
 from google import genai
 from google.genai import types
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_LABELS = [
     "Groceries", "Dining", "Transportation", "Utilities",
     "Rent", "Entertainment", "Other"
 ]
+
+CHUNK_SIZE = 50  # Max descriptions per Gemini call to stay within output token limits
 
 
 def get_labels() -> list:
@@ -18,22 +23,18 @@ def get_labels() -> list:
 
 def _sanitize(description: str) -> str:
     """Wrap description in XML tags to structurally separate it from prompt instructions."""
-    # Strip any XML-like tags the user may have injected
     import re
     cleaned = re.sub(r'<[^>]+>', '', description).strip()
     return f"<transaction>{cleaned}</transaction>"
 
 
-def categorize_batch(descriptions: list[str]) -> list[str]:
-    """Categorize a list of transaction descriptions in a single API call."""
+def _categorize_chunk(descriptions: list[str], labels: list[str]) -> list[str]:
+    """Categorize a single chunk of up to CHUNK_SIZE descriptions."""
     api_key = os.getenv("GEMINI_API_KEY", "")
     if not api_key:
         return ["Other"] * len(descriptions)
 
-    labels = get_labels()
     labels_str = ", ".join(labels)
-
-    # Sanitize each description before inserting into prompt
     sanitized = [_sanitize(d) for d in descriptions]
     numbered = "\n".join(f"{i+1}. {desc}" for i, desc in enumerate(sanitized))
 
@@ -64,6 +65,8 @@ def categorize_batch(descriptions: list[str]) -> list[str]:
         results = []
         for line in lines:
             line = line.strip()
+            if not line:
+                continue
             for sep in [". ", ") ", "- "]:
                 if sep in line:
                     line = line.split(sep, 1)[-1].strip()
@@ -80,11 +83,34 @@ def categorize_batch(descriptions: list[str]) -> list[str]:
             results.append(matched)
 
         if len(results) < len(descriptions):
+            logger.warning(
+                f"Gemini returned {len(results)} categories for {len(descriptions)} descriptions — "
+                f"padding remainder with 'Other'"
+            )
             results += ["Other"] * (len(descriptions) - len(results))
+
         return results[:len(descriptions)]
 
-    except Exception:
+    except Exception as e:
+        logger.error(f"Gemini categorization error for chunk of {len(descriptions)}: {e}")
         return ["Other"] * len(descriptions)
+
+
+def categorize_batch(descriptions: list[str]) -> list[str]:
+    """Categorize a list of transaction descriptions, chunked to avoid token limits."""
+    if not descriptions:
+        return []
+
+    labels = get_labels()
+    results = []
+
+    for i in range(0, len(descriptions), CHUNK_SIZE):
+        chunk = descriptions[i:i + CHUNK_SIZE]
+        chunk_results = _categorize_chunk(chunk, labels)
+        results.extend(chunk_results)
+        logger.info(f"Categorized chunk {i // CHUNK_SIZE + 1} ({len(chunk)} transactions)")
+
+    return results
 
 
 def categorize_text(description: str) -> str:

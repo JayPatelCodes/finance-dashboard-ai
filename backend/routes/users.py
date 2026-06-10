@@ -1,4 +1,5 @@
 import os
+import uuid
 from fastapi import APIRouter, HTTPException, status, Depends, Request
 from fastapi.responses import JSONResponse
 from slowapi import Limiter
@@ -140,6 +141,27 @@ async def google_auth(body: GoogleAuthRequest):
 
     token = create_access_token({"sub": str(user["_id"])})
     return TokenResponse(access_token=token, user=_fmt_user(user))
+
+
+@router.post("/guest", response_model=TokenResponse)
+async def guest_login(request: Request):
+    """Create a temporary guest account, auto-deleted after 24 hours."""
+    import datetime
+    guest_id = str(uuid.uuid4()).replace("-", "")[:12]
+    email = f"guest_{guest_id}@guest.local"
+    user_doc = {
+        "name": "Guest",
+        "email": email,
+        "password": hash_password(str(uuid.uuid4())),  # random unusable password
+        "avatar": None,
+        "provider": "guest",
+        "is_guest": True,
+        "created_at": datetime.datetime.utcnow(),
+    }
+    result = await db["users"].insert_one(user_doc)
+    user_doc["_id"] = result.inserted_id
+    token = create_access_token({"sub": str(result.inserted_id)})
+    return TokenResponse(access_token=token, user=_fmt_user(user_doc))
 
 
 @router.post("/logout")

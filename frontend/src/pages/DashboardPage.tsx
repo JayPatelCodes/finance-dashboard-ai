@@ -14,6 +14,8 @@ type Props = {
   showYearPicker: boolean
   setShowYearPicker: (v: boolean | ((prev: boolean) => boolean)) => void
   dataLoading: boolean
+  onDemoLoaded: () => void
+  isGuest: boolean
 }
 
 const INSIGHT_LABELS: Record<string, string> = {
@@ -27,7 +29,7 @@ function fmtMonth(m: string) {
   return new Date(+y, +mo - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 }
 
-function WelcomeState() {
+function WelcomeState({ onDemoLoaded, isGuest }: { onDemoLoaded: () => void; isGuest: boolean }) {
   return (
     <div style={{
       display: 'flex',
@@ -44,7 +46,9 @@ function WelcomeState() {
           Welcome to FinAI
         </h2>
         <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: 15, maxWidth: 400 }}>
-          Upload your first CSV file to get started. Your transactions will be automatically categorized and visualized.
+          {isGuest
+            ? 'Load the demo to explore all features, or upload your own CSV using the sidebar.'
+            : 'Upload your first CSV file to get started. Your transactions will be automatically categorized and visualized.'}
         </p>
       </div>
 
@@ -77,6 +81,20 @@ function WelcomeState() {
         ))}
       </div>
 
+      {/* Demo data button (shown for all users with no data) */}
+      <button
+        className="button button-primary"
+        style={{ fontSize: 14, padding: '12px 36px', marginTop: 4 }}
+        onClick={onDemoLoaded}
+      >
+        ✦ Load Demo Data
+      </button>
+      <p style={{ margin: '-12px 0 0', fontSize: 12, color: 'var(--text-dim)' }}>
+        {isGuest
+          ? '14 months of sample transactions, so you can explore every feature'
+          : 'Try it with sample data before uploading your own'}
+      </p>
+
       <div style={{
         background: 'rgba(79,142,247,0.08)',
         border: '1px solid rgba(79,142,247,0.2)',
@@ -94,14 +112,15 @@ function WelcomeState() {
 
 export default function DashboardPage({
   tx, insights, months, activeMonth, forecast,
-  onMonthChange, onRefresh, showYearPicker, setShowYearPicker
-, dataLoading}: Props) {
+  onMonthChange, onRefresh, showYearPicker, setShowYearPicker,
+  dataLoading, onDemoLoaded, isGuest,
+}: Props) {
 
   const hasData = tx.length > 0 || months.length > 0
 
   return (
     <div>
-      {/* Month navigator, which only show when there's data */}
+      {/* Month navigator (only shown when there's data */}
       {months.length > 0 ? (
         <header className="main-header">
           <div className="month-nav-header">
@@ -197,7 +216,7 @@ export default function DashboardPage({
           <div className="card"><h3>Transaction History</h3><SkeletonTable /></div>
         </div>
       ) : !hasData ? (
-        <WelcomeState />
+        <WelcomeState onDemoLoaded={onDemoLoaded} isGuest={isGuest} />
       ) : (
         <div className="dashboard-grid">
           <div className="card">

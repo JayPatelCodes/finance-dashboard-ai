@@ -31,6 +31,11 @@ export const googleAuth = async (token: string): Promise<AuthResponse> => {
   return data
 }
 
+export const guestLogin = async (): Promise<AuthResponse> => {
+  const { data } = await api.post<AuthResponse>('/auth/guest')
+  return data
+}
+
 export const uploadCsv = async (file: File) => {
   const form = new FormData()
   form.append('file', file)
