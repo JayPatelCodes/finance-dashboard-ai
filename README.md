@@ -18,10 +18,9 @@ A full-stack personal finance dashboard where users can upload bank transaction 
 
 ## Description
 
-FinAI lets users securely sign up, upload their bank transaction CSVs, and instantly see their spending broken down by category, trend, and 30-day forecast. Transactions are categorized automatically using a single batched Gemini API call. A built-in chatbot answers natural language questions about spending patterns, top categories, and monthly comparisons. Each user's data is fully isolated behind JWT authentication, and categories can be corrected inline if the AI gets one wrong.
+FinAI lets users sign up, upload their bank transaction CSVs, and see their spending broken down by category, trend, and 30-day forecast. Transactions are categorized automatically using Gemini, with support for inline corrections if the AI gets one wrong. A built-in chatbot answers natural language questions about spending patterns, top categories, and monthly comparisons. Each user's data is fully isolated behind JWT authentication.
 
 ---
-
 
 ## Security
 
@@ -33,10 +32,12 @@ A red-team security assessment was conducted against a live instance of the appl
 
 ## Features
 
-- Secure sign up and login with email/password or Google OAuth
+- Sign up and log in with email/password or Google OAuth, or explore as a guest
+- Guest accounts are automatically deleted after 24 hours
+- Load sample data with one click to try all features without uploading a file
 - Upload transaction CSV files with duplicate detection and a 5MB size limit
-- Automatic expense categorization using Gemini 2.5 Flash (batch call, no local model)
-- Inline category editing directly in the transaction table
+- Automatic expense categorization using Gemini 2.5 Flash
+- Inline category editing in the transaction table
 - Interactive charts: spending by category (donut), daily trends (area), and 30-day forecast
 - Month-by-month navigation with a year picker for historical data
 - Budget goals per category with progress bars (persistent or month-specific)
@@ -120,10 +121,10 @@ VITE_GOOGLE_CLIENT_ID=   # optional, for Google OAuth
 ## Usage
 
 1. Open [http://localhost:5173](http://localhost:5173) in your browser.
-2. Create an account or sign in.
-3. Upload a `.csv` file with columns: `Date`, `Description`, `Amount`. Amounts should be negative for expenses and positive for income.
+2. Create an account, sign in, or continue as a guest.
+3. Load the sample data or upload a `.csv` file with columns: `Date`, `Description`, `Amount`. Amounts should be negative for expenses and positive for income.
 4. Browse your categorized transactions, charts, and spending insights on the Dashboard.
-5. Use the month navigator at the top to switch between months, or click the month name to open a year picker.
+5. Use the month navigator to switch between months, or click the month name to open a year picker.
 6. Click any category badge in the transaction table to edit it inline.
 7. Set budget limits per category on the Budgets page.
 8. View recurring transactions detected across your history on the Recurring page.
